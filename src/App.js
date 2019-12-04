@@ -1,20 +1,48 @@
 import React from 'react';
+import axios from 'axios'; 
+import MakeMovie from './Movie';
+import "./App.css"
 
 class App extends React.Component{
   state = {
-    isloading : true
+    isloading : true,
+    movies : {}
   }
  
+  getMovies = async () => {
+    const { data: { data: { movies } } } = await axios.get('https://yts-proxy.now.sh/list_movies.json&sort_by');
+    this.setState({isloading : false, movies : movies})
+  }
+
   componentDidMount = () => {
-    setTimeout(() => {
-      this.setState({isloading : false})
-    }, 3000);
+    this.getMovies();    
   }
 
   render(){
-    const {isloading} = this.state;
+    const {isloading, movies} = this.state;
     return(
-      <div>{isloading ? "is loding ..." : "i am ready"}</div>
+      <section className="container">
+        {
+          isloading ? 
+          <div className="loading">
+            <span className="spantext_loder">is loading...</span>
+          </div> :(
+            <div className="movies">
+              {movies.map(movie => (
+                <MakeMovie 
+                  key={movie.id}
+                  id={movie.id}
+                  year={movie.year}
+                  title={movie.title}
+                  summary={movie.summary}
+                  poster={movie.medium_cover_image}
+                  genres={movie.genres}
+                />
+              ))}
+            </div>            
+          )
+        }
+      </section>
     )
   }
 }
